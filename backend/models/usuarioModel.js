@@ -1,14 +1,43 @@
-const db = require("../config/db");
+const db = require('../config/db');
 
-async function listarUsuarios() {
+const UsuarioModel = {
 
-    const resultado =
-        await db.query(
-            "SELECT * FROM usuario"
-        );
+  async criar({ nome, email, senhaHash, telefone, cidade, tipo_perfil }) {
+    const query = `
+      INSERT INTO usuario (nome, email, senha, telefone, cidade, tipo_perfil)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, nome, email, telefone, cidade, tipo_perfil
+    `;
 
+    const valores = [nome, email, senhaHash, telefone, cidade, tipo_perfil];
+    const resultado = await db.query(query, valores);
+    return resultado.rows[0];
+  },
+
+  async buscarPorEmail(email) {
+    const query = 'SELECT * FROM usuario WHERE email = $1';
+    const resultado = await db.query(query, [email]);
+    return resultado.rows[0];
+  },
+
+  async buscarPorId(id) {
+    const query = `
+      SELECT id, nome, email, telefone, cidade, tipo_perfil 
+      FROM usuario WHERE id = $1
+    `;
+    const resultado = await db.query(query, [id]);
+    return resultado.rows[0];
+  },
+
+  async listarUsuarios() {
+    const query = `
+      SELECT id, nome, email, telefone, cidade, tipo_perfil 
+      FROM usuario ORDER BY id
+    `;
+    const resultado = await db.query(query);
     return resultado.rows;
-}
+  }
+};
 
 async function buscarUsuarioPorId(id) {
 
@@ -115,9 +144,9 @@ async function deletarUsuario(id) {
 }
 
 module.exports = {
-    listarUsuarios,
     buscarUsuarioPorId,
     criarUsuario,
     atualizarUsuario,
-    deletarUsuario
+    deletarUsuario,
+    UsuarioModel
 };
