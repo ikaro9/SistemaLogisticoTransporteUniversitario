@@ -54,9 +54,9 @@ const UsuarioController = {
         return res.status(401).json({ erro: 'Email ou senha inválidos.' });
       }
 
-      req.session.usuarioId = usuario.id;
-      req.session.usuarioNome = usuario.nome;
-      req.session.usuarioTipo = usuario.tipo_perfil;
+  req.session.usuario_id = usuario.id;
+  req.session.usuario_nome = usuario.nome;
+  req.session.usuario_tipo = usuario.tipo_perfil;
 
       return res.status(200).json({
         mensagem: `Bem-vindo, ${usuario.nome}!`,
@@ -110,7 +110,7 @@ const UsuarioController = {
     try {
 
         const usuarios =
-            await usuarioModel.listarUsuarios();
+            await UsuarioModel.listarUsuarios();
 
         res.status(200).json(usuarios);
 

@@ -20,13 +20,13 @@ async function entrarEmRota(req, res) {
 
         const participacao = await participacaoModel.entrarEmRota(usuario_id, rota_id);
 
-        res.status(201).json({
+       return res.status(201).json({
             mensagem: "Entrada na rota realizada com sucesso",
             participacao
         });
     } catch (erro) {
         console.error(erro);
-        res.status(500).json({
+      return  res.status(500).json({
             mensagem: erro.message || "Erro ao entrar em rota"
         });
     }
@@ -35,7 +35,7 @@ async function entrarEmRota(req, res) {
 // Confirmar presença
 async function confirmarPresenca(req, res) {
     try {
-        const { rota_id } = req.body;
+        const { rota_id, status} = req.body;
         const usuario_id = req.session.usuario_id;
 
         if (!usuario_id) {
@@ -44,21 +44,21 @@ async function confirmarPresenca(req, res) {
             });
         }
 
-        if (!rota_id) {
+        if (!rota_id || !status) {
             return res.status(400).json({
-                mensagem: "rota_id é obrigatório"
+                mensagem: "rota_id e status são obrigatórios"
             });
         }
 
-        const confirmacao = await participacaoModel.confirmarPresenca(usuario_id, rota_id);
+        const confirmacao = await participacaoModel.confirmarPresenca(usuario_id, rota_id,status);
 
-        res.status(200).json({
+      return res.status(200).json({
             mensagem: "Presença confirmada com sucesso",
             confirmacao
         });
     } catch (erro) {
         console.error(erro);
-        res.status(500).json({
+       return res.status(500).json({
             mensagem: erro.message || "Erro ao confirmar presença"
         });
     }
@@ -84,13 +84,13 @@ async function cancelarPresenca(req, res) {
 
         const resultado = await participacaoModel.cancelarPresenca(usuario_id, rota_id);
 
-        res.status(200).json({
+      return res.status(200).json({
             mensagem: "Presença cancelada com sucesso",
-            resultado
+            confirmacao: resultado
         });
     } catch (erro) {
         console.error(erro);
-        res.status(500).json({
+       return res.status(500).json({
             mensagem: erro.message || "Erro ao cancelar presença"
         });
     }
@@ -109,10 +109,10 @@ async function listarParticipantes(req, res) {
 
         const participantes = await participacaoModel.listarParticipantes(rota_id);
 
-        res.status(200).json(participantes);
+         return res.status(200).json(participantes);
     } catch (erro) {
         console.error(erro);
-        res.status(500).json({
+        return res.status(500).json({
             mensagem: "Erro ao listar participantes"
         });
     }
@@ -132,12 +132,13 @@ async function verificarParticipacao(req, res) {
 
         const participacao = await participacaoModel.verificarParticipacao(usuario_id, rota_id);
 
-        res.status(200).json(participacao || {
-            participando: false
+        return res.status(200).json({
+            participando: !!participacao,
+            dados: participacao
         });
     } catch (erro) {
         console.error(erro);
-        res.status(500).json({
+        return res.status(500).json({
             mensagem: "Erro ao verificar participação"
         });
     }
@@ -156,10 +157,10 @@ async function listarMinhasRotas(req, res) {
 
         const rotas = await participacaoModel.listarMinhasRotas(usuario_id);
 
-        res.status(200).json(rotas);
+        return res.status(200).json(rotas);
     } catch (erro) {
         console.error(erro);
-        res.status(500).json({
+        return res.status(500).json({
             mensagem: "Erro ao listar suas rotas"
         });
     }

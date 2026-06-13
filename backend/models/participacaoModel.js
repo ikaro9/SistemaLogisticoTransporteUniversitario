@@ -13,12 +13,19 @@ async function entrarEmRota(usuario_id, rota_id) {
             throw new Error("Usuário já está participando desta rota");
         }
 
-        // Verificar se ainda há vagas disponíveis
+       // Verifica se a rota existe e vagas disponíveis
         const rota = await db.query(
-            `SELECT id, vagas_maximas, 
-                    (SELECT COUNT(*) FROM confirmacao 
-                     WHERE rota_id = $1 AND confirmado = true) as vagas_usadas
-             FROM rota WHERE id = $1`,
+            `SELECT 
+                id, 
+                vagas_maximas,
+                (
+                    SELECT COUNT(*) 
+                    FROM confirmacao 
+                    WHERE rota_id = $1 
+                    AND status != 'CANCELADO'
+                ) AS vagas_usadas
+             FROM rota 
+             WHERE id = $1`,
             [rota_id]
         );
 
@@ -33,12 +40,16 @@ async function entrarEmRota(usuario_id, rota_id) {
         }
 
         // Criar participação
-        const resultado = await db.query(
-            `INSERT INTO participacao (usuario_id, rota_id, data_participacao)
-             VALUES ($1, $2, NOW())
-             RETURNING *`,
-            [usuario_id, rota_id]
-        );
+     const resultado = await db.query(
+    `INSERT INTO participacao
+    (
+        usuario_id,
+        rota_id
+    )
+    VALUES ($1,$2)
+    RETURNING *`,
+    [usuario_id, rota_id]
+);
 
         return resultado.rows[0];
     } catch (erro) {
@@ -47,7 +58,7 @@ async function entrarEmRota(usuario_id, rota_id) {
 }
 
 // Confirmar presença na rota
-async function confirmarPresenca(usuario_id, rota_id) {
+async function confirmarPresenca(usuario_id, rota_id,status) {
     try {
         // Verificar se participa da rota
         const participacao = await db.query(
@@ -59,54 +70,20 @@ async function confirmarPresenca(usuario_id, rota_id) {
             throw new Error("Usuário não participa desta rota");
         }
 
-        // Verificar se já confirmou
-        const jaConfirmou = await db.query(
-            "SELECT * FROM confirmacao WHERE usuario_id = $1 AND rota_id = $2",
-            [usuario_id, rota_id]
+               // Insere ou atualiza confirmação
+        const resultado = await db.query(
+            `INSERT INTO confirmacao (usuario_id, rota_id, status)
+             VALUES ($1, $2, $3)
+             ON CONFLICT (usuario_id, rota_id)
+             DO UPDATE SET 
+                status = EXCLUDED.status,
+                data_confirmacao = NOW()
+             RETURNING *`,
+            [usuario_id, rota_id, status]
         );
-
-        if (jaConfirmou.rows.length > 0 && jaConfirmou.rows[0].confirmado) {
-            throw new Error("Usuário já confirmou presença");
-        }
-
-        // Verificar se ainda há vagas
-        const vagas = await db.query(
-            `SELECT vagas_maximas,
-                    (SELECT COUNT(*) FROM confirmacao 
-                     WHERE rota_id = $1 AND confirmado = true) as vagas_usadas
-             FROM rota WHERE id = $1`,
-            [rota_id]
-        );
-
-        const { vagas_maximas, vagas_usadas } = vagas.rows[0];
-
-        if (parseInt(vagas_usadas) >= parseInt(vagas_maximas)) {
-            throw new Error("Não há mais vagas disponíveis");
-        }
-
-        // Inserir ou atualizar confirmação
-        let resultado;
-
-        if (jaConfirmou.rows.length > 0) {
-            // Atualizar confirmação existente
-            resultado = await db.query(
-                `UPDATE confirmacao 
-                 SET confirmado = true, data_confirmacao = NOW()
-                 WHERE usuario_id = $1 AND rota_id = $2
-                 RETURNING *`,
-                [usuario_id, rota_id]
-            );
-        } else {
-            // Criar nova confirmação
-            resultado = await db.query(
-                `INSERT INTO confirmacao (usuario_id, rota_id, confirmado, data_confirmacao)
-                 VALUES ($1, $2, true, NOW())
-                 RETURNING *`,
-                [usuario_id, rota_id]
-            );
-        }
 
         return resultado.rows[0];
+
     } catch (erro) {
         throw erro;
     }
@@ -118,7 +95,7 @@ async function cancelarPresenca(usuario_id, rota_id) {
         // Remover confirmação
         const resultado = await db.query(
             `UPDATE confirmacao 
-             SET confirmado = false, data_confirmacao = NOW()
+             SET status = 'CANCELADO', data_confirmacao = NOW()
              WHERE usuario_id = $1 AND rota_id = $2
              RETURNING *`,
             [usuario_id, rota_id]
@@ -138,12 +115,22 @@ async function cancelarPresenca(usuario_id, rota_id) {
 async function listarParticipantes(rota_id) {
     try {
         const resultado = await db.query(
-            `SELECT u.id, u.nome, u.email, u.telefone, c.confirmado, c.data_confirmacao
+             `SELECT 
+                u.id,
+                u.nome,
+                u.email,
+                u.telefone,
+                p.data_entrada,
+                c.status,
+                c.data_confirmacao
              FROM usuario u
-             INNER JOIN participacao p ON u.id = p.usuario_id
-             LEFT JOIN confirmacao c ON u.id = c.usuario_id AND c.rota_id = p.rota_id
+             INNER JOIN participacao p 
+                ON u.id = p.usuario_id
+             LEFT JOIN confirmacao c 
+                ON u.id = c.usuario_id 
+                AND p.rota_id = c.rota_id
              WHERE p.rota_id = $1
-             ORDER BY c.confirmado DESC, u.nome`,
+             ORDER BY c.status NULLS LAST, u.nome`,
             [rota_id]
         );
 
@@ -157,10 +144,17 @@ async function listarParticipantes(rota_id) {
 async function verificarParticipacao(usuario_id, rota_id) {
     try {
         const resultado = await db.query(
-            `SELECT p.id as participacao_id, c.id as confirmacao_id, c.confirmado, c.data_confirmacao
+            `SELECT 
+                p.id AS participacao_id,
+                c.id AS confirmacao_id,
+                c.status,
+                c.data_confirmacao
              FROM participacao p
-             LEFT JOIN confirmacao c ON p.usuario_id = c.usuario_id AND p.rota_id = c.rota_id
-             WHERE p.usuario_id = $1 AND p.rota_id = $2`,
+             LEFT JOIN confirmacao c 
+                ON p.usuario_id = c.usuario_id 
+                AND p.rota_id = c.rota_id
+             WHERE p.usuario_id = $1 
+             AND p.rota_id = $2`,
             [usuario_id, rota_id]
         );
 
@@ -174,12 +168,22 @@ async function verificarParticipacao(usuario_id, rota_id) {
 async function listarMinhasRotas(usuario_id) {
     try {
         const resultado = await db.query(
-            `SELECT r.*, c.confirmado, c.data_confirmacao,
-                    (SELECT COUNT(*) FROM confirmacao 
-                     WHERE rota_id = r.id AND confirmado = true) as confirmados
+            `SELECT 
+                r.*,
+                c.status,
+                c.data_confirmacao,
+                (
+                    SELECT COUNT(*) 
+                    FROM confirmacao 
+                    WHERE rota_id = r.id 
+                    AND status != 'CANCELADO'
+                ) AS confirmados
              FROM rota r
-             INNER JOIN participacao p ON r.id = p.rota_id
-             LEFT JOIN confirmacao c ON p.usuario_id = c.usuario_id AND r.id = c.rota_id
+             INNER JOIN participacao p 
+                ON r.id = p.rota_id
+             LEFT JOIN confirmacao c 
+                ON p.usuario_id = c.usuario_id 
+                AND r.id = c.rota_id
              WHERE p.usuario_id = $1
              ORDER BY r.id`,
             [usuario_id]

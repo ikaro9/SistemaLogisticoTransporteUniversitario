@@ -3,6 +3,10 @@ const router = express.Router();
 
 const participacaoController = require("../controllers/participacaoController");
 
+const authMiddleware = require("../middlewares/authMiddleware");
+
+router.use(authMiddleware);
+
 // Entrar em uma rota
 router.post("/entrar", participacaoController.entrarEmRota);
 
@@ -13,7 +17,7 @@ router.post("/confirmar", participacaoController.confirmarPresenca);
 router.post("/cancelar", participacaoController.cancelarPresenca);
 
 // Listar participantes de uma rota
-router.get("/rota/:rota_id", participacaoController.listarParticipantes);
+router.get("/participantes/:rota_id", participacaoController.listarParticipantes);
 
 // Verificar status de participação do usuário em uma rota
 router.get("/verificar/:rota_id", participacaoController.verificarParticipacao);
