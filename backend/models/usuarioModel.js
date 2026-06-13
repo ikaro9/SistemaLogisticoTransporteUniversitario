@@ -2,14 +2,14 @@ const db = require('../config/db');
 
 const UsuarioModel = {
 
-  async criar({ nome, email, senhaHash, telefone, cidade, tipo_perfil }) {
+  async criar({ nome, email, senhaHash, telefone, cidade, tipo_perfil, instituicao }) {
     const query = `
-      INSERT INTO usuario (nome, email, senha, telefone, cidade, tipo_perfil)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id, nome, email, telefone, cidade, tipo_perfil
+      INSERT INTO usuario (nome, email, senha, telefone, cidade, tipo_perfil, instituicao)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id, nome, email, telefone, cidade, tipo_perfil, instituicao
     `;
 
-    const valores = [nome, email, senhaHash, telefone, cidade, tipo_perfil];
+    const valores = [nome, email, senhaHash, telefone, cidade, tipo_perfil, instituicao];
     const resultado = await db.query(query, valores);
     return resultado.rows[0];
   },
@@ -22,7 +22,7 @@ const UsuarioModel = {
 
   async buscarPorId(id) {
     const query = `
-      SELECT id, nome, email, telefone, cidade, tipo_perfil 
+      SELECT id, nome, email, telefone, cidade, tipo_perfil, instituicao
       FROM usuario WHERE id = $1
     `;
     const resultado = await db.query(query, [id]);
@@ -31,67 +31,14 @@ const UsuarioModel = {
 
   async listarUsuarios() {
     const query = `
-      SELECT id, nome, email, telefone, cidade, tipo_perfil 
+      SELECT id, nome, email, telefone, cidade, tipo_perfil, instituicao
       FROM usuario ORDER BY id
     `;
     const resultado = await db.query(query);
     return resultado.rows;
-  }
-};
+  },
 
-async function buscarUsuarioPorId(id) {
-
-    const resultado =
-        await db.query(
-            "SELECT * FROM usuario WHERE id = $1",
-            [id]
-        );
-
-    return resultado.rows[0];
-}
-
-async function criarUsuario(dados) {
-
-    const {
-        nome,
-        email,
-        senha,
-        telefone,
-        cidade,
-        tipo_perfil,
-        instituicao
-    } = dados;
-
-    const resultado =
-        await db.query(
-            `INSERT INTO usuario
-            (
-                nome,
-                email,
-                senha,
-                telefone,
-                cidade,
-                tipo_perfil,
-                instituicao
-            )
-            VALUES
-            ($1,$2,$3,$4,$5,$6,$7)
-            RETURNING *`,
-            [
-                nome,
-                email,
-                senha,
-                telefone,
-                cidade,
-                tipo_perfil,
-                instituicao
-            ]
-        );
-
-    return resultado.rows[0];
-}
-
-async function atualizarUsuario(id, dados) {
+  async atualizarUsuario(id, dados) {
 
     const {
         nome,
@@ -128,9 +75,9 @@ async function atualizarUsuario(id, dados) {
         );
 
     return resultado.rows[0];
-}
+},
 
-async function deletarUsuario(id) {
+async  deletarUsuario(id) {
 
     const resultado =
         await db.query(
@@ -143,10 +90,6 @@ async function deletarUsuario(id) {
     return resultado.rows[0];
 }
 
-module.exports = {
-    buscarUsuarioPorId,
-    criarUsuario,
-    atualizarUsuario,
-    deletarUsuario,
-    UsuarioModel
 };
+
+module.exports = UsuarioModel;

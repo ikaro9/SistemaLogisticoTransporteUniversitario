@@ -5,9 +5,9 @@ const UsuarioController = {
 
   async cadastrar(req, res) {
     try {
-      const { nome, email, senha, telefone, cidade, tipo_perfil } = req.body;
+      const { nome, email, senha, telefone, cidade, tipo_perfil, instituicao } = req.body;
 
-      if (!nome || !email || !senha || !telefone || !cidade || !tipo_perfil) {
+      if (!nome || !email || !senha || !telefone || !cidade || !tipo_perfil || !instituicao) {
         return res.status(400).json({ erro: 'Todos os campos sao obrigatorios.' });
       }
 
@@ -19,7 +19,7 @@ const UsuarioController = {
       const senhaHash = await bcrypt.hash(senha, 10);
 
       const novoUsuario = await UsuarioModel.criar({
-        nome, email, senhaHash, telefone, cidade, tipo_perfil
+        nome, email, senhaHash, telefone, cidade, tipo_perfil, instituicao
       });
 
       return res.status(201).json({
@@ -103,13 +103,9 @@ const UsuarioController = {
       console.error('Erro ao buscar sessão:', erro);
       return res.status(500).json({ erro: 'Erro interno do servidor.' });
     }
-  }
-};
+  },
 
-const usuarioModel =
-    require("../models/usuarioModel");
-
-    async function listarUsuarios(req, res) {
+   async  listarUsuarios(req, res) {
 
     try {
 
@@ -127,9 +123,9 @@ const usuarioModel =
             erro: erro.message
         });
     }
-}
+},
 
-async function buscarUsuarioPorId(req, res) {
+async  buscarUsuarioPorId(req, res) {
 
     try {
 
@@ -156,29 +152,9 @@ async function buscarUsuarioPorId(req, res) {
             erro: erro.message
         });
     }
-}
+},
 
-async function criarUsuario(req, res) {
-
-    try {
-
-        const novoUsuario =
-            await usuarioModel.criarUsuario(req.body);
-
-        res.status(201).json(novoUsuario);
-
-    } catch (erro) {
-
-        console.error(erro);
-
-        res.status(500).json({
-            mensagem: "Erro ao criar usuário",
-            erro: erro.message
-        });
-    }
-}
-
-async function atualizarUsuario(req, res) {
+async  atualizarUsuario(req, res) {
 
     try {
 
@@ -208,9 +184,9 @@ async function atualizarUsuario(req, res) {
             erro: erro.message
         });
     }
-}
+},
 
-async function deletarUsuario(req, res) {
+async deletarUsuario(req, res) {
 
     try {
 
@@ -241,12 +217,8 @@ async function deletarUsuario(req, res) {
         });
     }
 }
-UsuarioController
-module.exports = {
-    listarUsuarios,
-    buscarUsuarioPorId,
-    criarUsuario,
-    atualizarUsuario,
-    UsuarioController,
-    deletarUsuario
+
 };
+
+
+module.exports = UsuarioController;

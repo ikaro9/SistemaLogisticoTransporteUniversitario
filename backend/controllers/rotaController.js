@@ -20,7 +20,7 @@ async function buscarRotaPorId(req, res) {
 
         if (!rota) {
             return res.status(404).json({
-                mensagem: "Rota não encontrada"
+                mensagem: "Rota nï¿½o encontrada"
             });
         }
 
@@ -34,18 +34,64 @@ async function buscarRotaPorId(req, res) {
 }
 
 async function criarRota(req, res) {
-    try {
-        const novaRota = await rotaModel.criarRota(req.body);
 
-        res.status(201).json(novaRota);
+    try {
+
+        const {
+            nome,
+            descricao,
+            codigo,
+            vagas_maximas,
+            nome_veiculo,
+            cor_veiculo,
+            placa_veiculo,
+            criador_id,
+            motorista_id
+        } = req.body;
+
+        if (
+            !nome ||
+            !codigo ||
+            !vagas_maximas ||
+            !placa_veiculo
+        ) {
+            return res.status(400).json({
+                mensagem: "Preencha os campos obrigatÃ³rios."
+            });
+        }
+
+        if (vagas_maximas <= 0) {
+            return res.status(400).json({
+                mensagem: "A quantidade de vagas deve ser maior que zero."
+            });
+        }
+
+        const novaRota =
+            await rotaModel.criarRota({
+                nome,
+                descricao,
+                codigo,
+                vagas_maximas,
+                nome_veiculo,
+                cor_veiculo,
+                placa_veiculo,
+                criador_id,
+                motorista_id
+            });
+
+        return res.status(201).json({
+            mensagem: "Rota criada com sucesso.",
+            rota: novaRota
+        });
 
     } catch (erro) {
-      console.error(erro);
 
-    res.status(500).json({
-        mensagem: "Erro ao criar rota",
-        erro: erro.message
-    });
+        console.error(erro);
+
+        return res.status(500).json({
+            mensagem: "Erro ao criar rota",
+            erro: erro.message
+        });
     }
 }
 async function atualizarRota(req, res) {
@@ -62,7 +108,7 @@ async function atualizarRota(req, res) {
 
         if (!rotaAtualizada) {
             return res.status(404).json({
-                mensagem: "Rota não encontrada"
+                mensagem: "Rota nï¿½o encontrada"
             });
         }
 
@@ -90,7 +136,7 @@ async function deletarRota(req, res) {
 
         if (!rotaDeletada) {
             return res.status(404).json({
-                mensagem: "Rota não encontrada"
+                mensagem: "Rota nï¿½o encontrada"
             });
         }
 
