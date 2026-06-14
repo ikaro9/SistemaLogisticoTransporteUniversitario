@@ -6,7 +6,7 @@ async function entrarEmRota(req, res) {
     console.log(req.body);
     try {
 
-        const { codigo } = req.body;
+        const { codigo, rota_id } = req.body;
         const usuario_id = req.session.usuario_id;
 
         if (!usuario_id) {
@@ -15,17 +15,19 @@ async function entrarEmRota(req, res) {
             });
         }
 
-        if (!codigo) {
+        if (!codigo && !rota_id) {
             return res.status(400).json({
-                mensagem: "Código da rota é obrigatório"
+                mensagem: "Código da rota ou rota_id é obrigatório"
             });
         }
 
-        const rota = await rotaModel.buscarRotaPorCodigo(codigo);
+        const rota = rota_id
+            ? await rotaModel.buscarRotaPorId(rota_id)
+            : await rotaModel.buscarRotaPorCodigo(codigo);
 
         if (!rota) {
             return res.status(404).json({
-                mensagem: "Código da rota inválido"
+                mensagem: "Rota não encontrada ou código inválido"
             });
         }
 

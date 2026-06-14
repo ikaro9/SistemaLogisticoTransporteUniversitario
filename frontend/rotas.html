@@ -3,54 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rotas</title>
-
+    <title>Rotas | Transporte Universitário</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="app-page">
+    <header class="app-header">
+        <nav class="navbar" aria-label="Navegação principal">
+            <a class="nav-brand" href="rotas.html"><span class="brand-icon">🚌</span> Transporte Universitário</a>
+            <div class="nav-menu">
+                <a class="nav-link" data-page="rotas" href="rotas.html">Rotas</a>
+                <a class="nav-link" data-page="participantes" href="participantes.html">Participação</a>
+                <a class="nav-link" data-page="perfil" href="perfil.html">Perfil</a>
+                <button id="logoutButton" class="btn btn-secondary" type="button">Sair</button>
+            </div>
+        </nav>
+    </header>
 
-    <div class="container">
+    <main class="app-main">
+        <section class="page-hero">
+            <div class="hero-card">
+                <div class="badge">Sistema Logístico</div>
+                <h1>Rotas disponíveis</h1>
+                <p>Consulte rotas cadastradas, veja a ocupação de vagas e entre em uma rota utilizando o código fornecido pelo responsável.</p>
+                <div class="hero-actions">
+                    <a href="participantes.html" class="btn">Gerenciar minha participação</a>
+                    <a href="perfil.html" class="btn btn-secondary">Ver meu perfil</a>
+                </div>
+            </div>
 
-        <h1>Rotas Disponíveis</h1>
+            <aside class="quick-card card">
+                <h3>Entrar por código</h3>
+                <p>Digite o código da rota para solicitar sua participação.</p>
+                <div id="codigoFeedback" class="message" role="alert"></div>
+                <form id="codigoForm" class="form-grid">
+                    <div class="field">
+                        <label for="codigoRota">Código da rota</label>
+                        <input id="codigoRota" type="text" placeholder="Ex.: ROTA-01" required>
+                    </div>
+                    <button id="codigoButton" class="btn btn-full" type="submit">Entrar na rota</button>
+                </form>
+            </aside>
+        </section>
 
-        <h3 id="nomeRota">
-            Carregando rota...
-        </h3>
+        <section class="stats-grid" aria-label="Resumo das rotas">
+            <div class="stat-card"><span>Total de rotas</span><strong id="totalRotas">0</strong></div>
+            <div class="stat-card"><span>Total de vagas</span><strong id="totalVagas">0</strong></div>
+            <div class="stat-card"><span>Vagas ocupadas</span><strong id="totalConfirmados">0</strong></div>
+            <div class="stat-card"><span>Disponíveis</span><strong id="totalDisponiveis">0</strong></div>
+        </section>
 
-        <p>
-            <strong>Veículo:</strong>
-            <span id="veiculo">...</span>
-        </p>
+        <section class="toolbar" aria-label="Filtros de rotas">
+            <div class="section-title">
+                <h2>Lista de rotas</h2>
+                <p class="card-muted">Escolha uma rota para ver participantes ou confirmar presença.</p>
+            </div>
+            <label class="sr-only" for="buscaRotas">Buscar rota</label>
+            <input id="buscaRotas" class="search-input" type="search" placeholder="Buscar por nome, código, veículo ou placa...">
+        </section>
 
-        <p>
-            <strong>Cor:</strong>
-            <span id="cor">...</span>
-        </p>
+        <div id="rotasFeedback" class="message" role="alert"></div>
+        <div id="rotasLoading" class="loading"><div class="spinner"></div><span>Carregando rotas...</span></div>
+        <section id="rotasGrid" class="grid routes-grid" aria-live="polite"></section>
 
-        <p>
-            <strong>Placa:</strong>
-            <span id="placa">...</span>
-        </p>
+        <section id="adminPanel" class="form-card hidden" style="margin-top: 22px;" aria-labelledby="admin-title">
+            <h2 id="admin-title">Cadastrar nova rota</h2>
+            <p class="card-muted">Área exibida para usuários com perfil ADMIN.</p>
+            <div id="adminFeedback" class="message" role="alert"></div>
+            <form id="rotaForm" class="form-grid two-columns">
+                <div class="field"><label for="nomeRota">Nome da rota</label><input id="nomeRota" required placeholder="Ex.: UFERSA → Centro"></div>
+                <div class="field"><label for="codigoNovaRota">Código</label><input id="codigoNovaRota" required placeholder="Ex.: ROTA-01"></div>
+                <div class="field"><label for="vagasMaximas">Vagas máximas</label><input id="vagasMaximas" type="number" min="1" required placeholder="Ex.: 20"></div>
+                <div class="field"><label for="nomeVeiculo">Veículo</label><input id="nomeVeiculo" placeholder="Ex.: Ônibus escolar"></div>
+                <div class="field"><label for="corVeiculo">Cor</label><input id="corVeiculo" placeholder="Ex.: Branco"></div>
+                <div class="field"><label for="placaVeiculo">Placa</label><input id="placaVeiculo" required placeholder="Ex.: ABC1D23"></div>
+                <div class="field" style="grid-column: 1 / -1;"><label for="descricaoRota">Descrição</label><textarea id="descricaoRota" placeholder="Informe origem, destino, pontos de parada e horário de referência."></textarea></div>
+                <button id="rotaButton" class="btn" type="submit" style="grid-column: 1 / -1;">Cadastrar rota</button>
+            </form>
+        </section>
+    </main>
 
-        <button>
-            Participar
-        </button>
-
-        <button onclick="window.location.href='participantes.html'">
-            Ver Participantes
-        </button>
-
-        <button>
-            Confirmar Ida
-        </button>
-
-        <button>
-            Confirmar Volta
-        </button>
-
-    </div>
-
+    <script src="js/app.js"></script>
     <script src="js/rotas.js"></script>
-
 </body>
 </html>

@@ -1,324 +1,288 @@
-// URL base da API
-const API_BASE = "http://localhost:3000";
-
-// Estado global
-let rotaAtual = null;
-let usuarioAtual = null;
+let usuarioLogado = null;
 let rotas = [];
+let rotaAtual = null;
+let participacaoAtual = null;
 
-// Elementos DOM
-const rotaSelect = document.getElementById("rotaSelect");
-const rotaInfo = document.getElementById("rotaInfo");
-const emptyState = document.getElementById("emptyState");
-const loading = document.getElementById("loading");
-const mensagem = document.getElementById("mensagem");
-
-const btnEntrar = document.getElementById("btnEntrar");
-const btnConfirmar = document.getElementById("btnConfirmar");
-const btnCancelar = document.getElementById("btnCancelar");
-
-const participantesList = document.getElementById("participantesList");
-const suaParticipacao = document.getElementById("suaParticipacao");
-const seuStatus = document.getElementById("seuStatus");
-
-// Event Listeners
 document.addEventListener("DOMContentLoaded", async () => {
+    setupAppShell("participantes");
+    usuarioLogado = await requireAuth();
+    if (!usuarioLogado) return;
+
+    bindEventosParticipacao();
     await carregarRotas();
 });
 
-rotaSelect.addEventListener("change", (e) => {
-    if (e.target.value) {
-        const rotaId = parseInt(e.target.value);
-        const rota = rotas.find(r => r.id === rotaId);
-        if (rota) {
-            carregarDetalhesRota(rota);
-        }
-    } else {
-        rotaInfo.style.display = "none";
-        emptyState.style.display = "none";
-    }
-});
+function bindEventosParticipacao() {
+    document.getElementById("rotaSelect").addEventListener("change", async (event) => {
+        const rota = rotas.find((item) => String(item.id) === event.target.value);
+        if (rota) await carregarDetalhesRota(rota);
+        else mostrarEstadoVazio();
+    });
 
-btnEntrar.addEventListener("click", () => entrarEmRota());
-btnConfirmar.addEventListener("click", () => confirmarPresenca());
-btnCancelar.addEventListener("click", () => cancelarPresenca());
+    document.getElementById("btnEntrar").addEventListener("click", entrarNaRotaAtual);
+    document.getElementById("btnConfirmar").addEventListener("click", confirmarPresenca);
+    document.getElementById("btnCancelar").addEventListener("click", cancelarPresenca);
+}
 
-// Funções Principais
 async function carregarRotas() {
+    const loading = document.getElementById("loading");
+    const mensagem = document.getElementById("mensagem");
+
     try {
-        mostrarLoading(true);
+        setLoading(loading, true);
+        clearMessage(mensagem);
 
-        const response = await fetch(`${API_BASE}/participacao/minhas-rotas`);
+        const data = await apiFetch("/rotas");
+        rotas = Array.isArray(data) ? data.map(normalizeRoute) : [];
+        atualizarSelectRotas();
 
-        if (!response.ok) {
-            if (response.status === 401) {
-                exibirMensagem("Você precisa estar autenticado", "error");
-                setTimeout(() => window.location.href = "login.html", 2000);
-                return;
-            }
-            throw new Error("Erro ao carregar rotas");
+        const rotaParam = getQueryParam("rota");
+        const rotaInicial = rotas.find((rota) => String(rota.id) === String(rotaParam)) || rotas[0];
+
+        if (rotaInicial) {
+            document.getElementById("rotaSelect").value = rotaInicial.id;
+            await carregarDetalhesRota(rotaInicial);
+        } else {
+            mostrarEstadoVazio("Nenhuma rota cadastrada", "Ainda não há rotas disponíveis no sistema.");
         }
-
-        rotas = await response.json();
-        atualizarSelectorRotas();
-
-        if (rotas.length === 0) {
-            emptyState.style.display = "block";
-            rotaInfo.style.display = "none";
-            exibirMensagem("Você não participa de nenhuma rota ainda", "info");
-        }
-    } catch (erro) {
-        console.error("Erro:", erro);
-        exibirMensagem("Erro ao carregar rotas: " + erro.message, "error");
+    } catch (error) {
+        showMessage(mensagem, error.message || "Erro ao carregar rotas.", "error");
+        mostrarEstadoVazio("Erro ao carregar", "Não foi possível consultar as rotas no momento.");
     } finally {
-        mostrarLoading(false);
+        setLoading(loading, false);
     }
+}
+
+function atualizarSelectRotas() {
+    const select = document.getElementById("rotaSelect");
+
+    if (rotas.length === 0) {
+        select.innerHTML = '<option value="">Nenhuma rota disponível</option>';
+        return;
+    }
+
+    select.innerHTML = '<option value="">Selecione uma rota...</option>' +
+        rotas.map((rota) => `
+            <option value="${rota.id}">${escapeHTML(rota.nome || "Rota")} — ${escapeHTML(rota.codigo || "sem código")} (${rota.confirmados}/${rota.vagas || 0})</option>
+        `).join("");
 }
 
 async function carregarDetalhesRota(rota) {
+    const loading = document.getElementById("loading");
+    const mensagem = document.getElementById("mensagem");
+
     try {
-        mostrarLoading(true);
-        rotaAtual = rota;
+        setLoading(loading, true);
+        clearMessage(mensagem);
+        rotaAtual = normalizeRoute(rota);
 
-        // Atualizar informações da rota
-        document.getElementById("rotaNome").textContent = rota.nome;
-        document.getElementById("rotaDescricao").textContent = rota.descricao;
-        document.getElementById("rotaCodigo").textContent = rota.codigo;
-        document.getElementById("rotaVeiculo").textContent = `${rota.nome_veiculo} - ${rota.cor_veiculo}`;
-        document.getElementById("rotaPlaca").textContent = rota.placa_veiculo;
-
-        // Atualizar vagas
-        const confirmados = rota.confirmados || 0;
-        const total = rota.vagas_maximas;
-        const percentual = Math.min((confirmados / total) * 100, 100);
-
-        document.getElementById("vagasTexto").textContent = `${confirmados} / ${total} vagas preenchidas`;
-        const vagasPreenchidas = document.getElementById("vagasPreenchidas");
-        vagasPreenchidas.style.width = percentual + "%";
-        vagasPreenchidas.textContent = percentual > 10 ? Math.round(percentual) + "%" : "";
-
-        // Verificar status de participação do usuário
+        preencherCardRota(rotaAtual);
         await verificarParticipacaoUsuario();
-
-        // Carregar participantes
         await carregarParticipantes();
 
-        rotaInfo.style.display = "block";
-        emptyState.style.display = "none";
-    } catch (erro) {
-        console.error("Erro:", erro);
-        exibirMensagem("Erro ao carregar detalhes da rota", "error");
+        document.getElementById("rotaInfo").classList.remove("hidden");
+        document.getElementById("emptyState").classList.add("hidden");
+    } catch (error) {
+        showMessage(mensagem, error.message || "Erro ao carregar detalhes da rota.", "error");
     } finally {
-        mostrarLoading(false);
+        setLoading(loading, false);
     }
+}
+
+function preencherCardRota(rota) {
+    const cheia = rota.vagas > 0 && rota.confirmados >= rota.vagas;
+
+    document.getElementById("rotaCodigo").textContent = rota.codigo || "Sem código";
+    document.getElementById("rotaNome").textContent = rota.nome || "Rota sem nome";
+    document.getElementById("rotaDescricao").textContent = rota.descricao || "Sem descrição cadastrada.";
+    document.getElementById("rotaVeiculo").textContent = `${rota.nome_veiculo || "Não informado"}${rota.cor_veiculo ? ` - ${rota.cor_veiculo}` : ""}`;
+    document.getElementById("rotaPlaca").textContent = rota.placa_veiculo || "Não informada";
+    document.getElementById("vagasTexto").textContent = `${rota.confirmados} / ${rota.vagas || 0} vagas preenchidas`;
+    document.getElementById("vagasPercentual").textContent = `${rota.percentage}%`;
+    document.getElementById("vagasPreenchidas").style.width = `${rota.percentage}%`;
+
+    const statusRota = document.getElementById("statusRota");
+    statusRota.textContent = cheia ? "Lotada" : "Disponível";
+    statusRota.className = `badge ${cheia ? "badge-danger" : "badge-success"}`;
 }
 
 async function verificarParticipacaoUsuario() {
+    participacaoAtual = null;
+
     try {
-        const response = await fetch(`${API_BASE}/participacao/verificar/${rotaAtual.id}`);
-
-        if (!response.ok) throw new Error("Erro ao verificar participação");
-
-        const participacao = await response.json();
-
-        // Atualizar botões
-        if (participacao.participacao_id) {
-            // Usuário já entrou na rota
-            btnEntrar.style.display = "none";
-
-            if (participacao.confirmado) {
-                // Confirmado
-                btnConfirmar.style.display = "none";
-                btnCancelar.style.display = "block";
-                suaParticipacao.style.display = "block";
-                seuStatus.innerHTML = '<span class="status-badge status-confirmado">✓ Confirmado</span>';
-                seuStatus.innerHTML += ` em ${new Date(participacao.data_confirmacao).toLocaleDateString('pt-BR')}`;
-            } else {
-                // Não confirmado ainda
-                btnConfirmar.style.display = "block";
-                btnCancelar.style.display = "none";
-                suaParticipacao.style.display = "block";
-                seuStatus.innerHTML = '<span class="status-badge status-nao-confirmado">⏳ Aguardando Confirmação</span>';
-            }
-        } else {
-            // Usuário ainda não entrou
-            btnEntrar.style.display = "block";
-            btnConfirmar.style.display = "none";
-            btnCancelar.style.display = "none";
-            suaParticipacao.style.display = "none";
+        const response = await apiFetch(`/participacao/verificar/${rotaAtual.id}`);
+        participacaoAtual = response?.dados || null;
+        atualizarBotoesParticipacao();
+    } catch (error) {
+        if (error.status === 401) {
+            window.location.href = "login.html";
+            return;
         }
-    } catch (erro) {
-        console.error("Erro:", erro);
+        atualizarBotoesParticipacao();
     }
 }
 
+function atualizarBotoesParticipacao() {
+    const btnEntrar = document.getElementById("btnEntrar");
+    const btnConfirmar = document.getElementById("btnConfirmar");
+    const btnCancelar = document.getElementById("btnCancelar");
+    const seuStatus = document.getElementById("seuStatus");
+    const confirmacaoControle = document.getElementById("confirmacaoControle");
+    const cheia = rotaAtual.vagas > 0 && rotaAtual.confirmados >= rotaAtual.vagas;
+
+    btnEntrar.classList.add("hidden");
+    btnConfirmar.classList.add("hidden");
+    btnCancelar.classList.add("hidden");
+    confirmacaoControle.classList.add("hidden");
+
+    if (!participacaoAtual?.participacao_id) {
+        seuStatus.innerHTML = `<span class="status-badge status-pendente">Você ainda não entrou nesta rota</span>`;
+        btnEntrar.classList.remove("hidden");
+        btnEntrar.disabled = cheia;
+        btnEntrar.textContent = cheia ? "Rota lotada" : "Entrar nesta rota";
+        return;
+    }
+
+    const status = participacaoAtual.status;
+    const confirmado = isConfirmed(status);
+
+    if (confirmado) {
+        seuStatus.innerHTML = `<span class="status-badge ${statusClass(status)}">${formatStatus(status)}</span>`;
+        btnCancelar.classList.remove("hidden");
+        return;
+    }
+
+    seuStatus.innerHTML = `<span class="status-badge ${statusClass(status)}">${formatStatus(status)}</span>`;
+    confirmacaoControle.classList.remove("hidden");
+    btnConfirmar.classList.remove("hidden");
+}
+
 async function carregarParticipantes() {
+    const participantesList = document.getElementById("participantesList");
+    const totalParticipantes = document.getElementById("totalParticipantes");
+
     try {
-        const response = await fetch(`${API_BASE}/participacao/rota/${rotaAtual.id}`);
+        const participantes = await apiFetch(`/participacao/rota/${rotaAtual.id}`);
+        const lista = Array.isArray(participantes) ? participantes : [];
+        totalParticipantes.textContent = lista.length;
 
-        if (!response.ok) throw new Error("Erro ao carregar participantes");
-
-        const participantes = await response.json();
-
-        if (participantes.length === 0) {
+        if (lista.length === 0) {
             participantesList.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-state-icon">📋</div>
-                    <p>Nenhum participante ainda</p>
+                    <div class="empty-state-icon">👥</div>
+                    <h3>Nenhum participante ainda</h3>
+                    <p>Entre na rota para aparecer nesta lista.</p>
                 </div>
             `;
             return;
         }
 
-        participantesList.innerHTML = participantes.map(p => `
-            <div class="participante-item">
-                <div class="participante-info">
-                    <div class="participante-nome">${p.nome}</div>
-                    <div class="participante-contato">📧 ${p.email}</div>
-                    <div class="participante-contato">📱 ${p.telefone || "Não informado"}</div>
+        participantesList.innerHTML = lista.map((participante) => {
+            const status = participante.status;
+            return `
+                <div class="participant-item">
+                    <div>
+                        <strong>${escapeHTML(participante.nome)}</strong>
+                        <small>📧 ${escapeHTML(participante.email)}</small>
+                        <small>📱 ${escapeHTML(participante.telefone || "Não informado")}</small>
+                    </div>
+                    <span class="status-badge ${statusClass(status)}">${formatStatus(status)}</span>
                 </div>
-                <div class="participante-status">
-                    ${p.confirmado
-                ? `<span class="status-badge status-confirmado">✓ Confirmado</span>`
-                : `<span class="status-badge status-nao-confirmado">⏳ Não Confirmado</span>`
-            }
-                </div>
+            `;
+        }).join("");
+    } catch (error) {
+        participantesList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">⚠️</div>
+                <h3>Erro ao carregar participantes</h3>
+                <p>${escapeHTML(error.message)}</p>
             </div>
-        `).join("");
-    } catch (erro) {
-        console.error("Erro:", erro);
-        exibirMensagem("Erro ao carregar participantes", "error");
+        `;
     }
 }
 
-// Ações de Participação
-async function entrarEmRota() {
-    try {
-        mostrarLoading(true);
+async function entrarNaRotaAtual() {
+    const mensagem = document.getElementById("mensagem");
+    const button = document.getElementById("btnEntrar");
 
-        const response = await fetch(`${API_BASE}/participacao/entrar`, {
+    try {
+        setButtonLoading(button, true, "Entrando...");
+        const resultado = await apiFetch("/participacao/entrar", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                rota_id: rotaAtual.id
-            }),
-            credentials: "include"
+            body: JSON.stringify({ codigo: rotaAtual.codigo, rota_id: rotaAtual.id })
         });
 
-        if (!response.ok) {
-            const erro = await response.json();
-            throw new Error(erro.mensagem || "Erro ao entrar na rota");
-        }
-
-        exibirMensagem("✓ Você entrou na rota com sucesso!", "success");
-
-        // Atualizar informações
-        await verificarParticipacaoUsuario();
-        await carregarParticipantes();
-    } catch (erro) {
-        console.error("Erro:", erro);
-        exibirMensagem("Erro: " + erro.message, "error");
+        showMessage(mensagem, resultado.mensagem || "Entrada na rota realizada com sucesso.", "success");
+        await recarregarRotaAtual();
+    } catch (error) {
+        showMessage(mensagem, error.message || "Erro ao entrar na rota.", "error");
     } finally {
-        mostrarLoading(false);
+        setButtonLoading(button, false);
     }
 }
 
 async function confirmarPresenca() {
-    try {
-        mostrarLoading(true);
+    const mensagem = document.getElementById("mensagem");
+    const button = document.getElementById("btnConfirmar");
 
-        const response = await fetch(`${API_BASE}/participacao/confirmar`, {
+    try {
+        setButtonLoading(button, true, "Confirmando...");
+        const status = document.getElementById("statusConfirmacao")?.value || "IDA_VOLTA";
+        const resultado = await apiFetch("/participacao/confirmar", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                rota_id: rotaAtual.id
-            }),
-            credentials: "include"
+            body: JSON.stringify({ rota_id: rotaAtual.id, status })
         });
 
-        if (!response.ok) {
-            const erro = await response.json();
-            throw new Error(erro.mensagem || "Erro ao confirmar presença");
-        }
-
-        exibirMensagem("✓ Presença confirmada com sucesso!", "success");
-
-        // Atualizar informações
-        await verificarParticipacaoUsuario();
-        await carregarParticipantes();
-        await carregarRotas();
-    } catch (erro) {
-        console.error("Erro:", erro);
-        exibirMensagem("Erro: " + erro.message, "error");
+        showMessage(mensagem, resultado.mensagem || "Presença confirmada com sucesso.", "success");
+        await recarregarRotaAtual();
+    } catch (error) {
+        showMessage(mensagem, error.message || "Erro ao confirmar presença.", "error");
     } finally {
-        mostrarLoading(false);
+        setButtonLoading(button, false);
     }
 }
 
 async function cancelarPresenca() {
-    if (!confirm("Tem certeza que deseja cancelar sua presença? Isso liberará a vaga que você ocupava.")) {
-        return;
-    }
+    const mensagem = document.getElementById("mensagem");
+    const button = document.getElementById("btnCancelar");
+
+    const confirma = window.confirm("Deseja realmente cancelar sua confirmação nesta rota?");
+    if (!confirma) return;
 
     try {
-        mostrarLoading(true);
-
-        const response = await fetch(`${API_BASE}/participacao/cancelar`, {
+        setButtonLoading(button, true, "Cancelando...");
+        const resultado = await apiFetch("/participacao/cancelar", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                rota_id: rotaAtual.id
-            }),
-            credentials: "include"
+            body: JSON.stringify({ rota_id: rotaAtual.id })
         });
 
-        if (!response.ok) {
-            const erro = await response.json();
-            throw new Error(erro.mensagem || "Erro ao cancelar presença");
-        }
-
-        exibirMensagem("✓ Presença cancelada com sucesso! A vaga foi liberada.", "success");
-
-        // Atualizar informações
-        await verificarParticipacaoUsuario();
-        await carregarParticipantes();
-        await carregarRotas();
-    } catch (erro) {
-        console.error("Erro:", erro);
-        exibirMensagem("Erro: " + erro.message, "error");
+        showMessage(mensagem, resultado.mensagem || "Presença cancelada com sucesso.", "success");
+        await recarregarRotaAtual();
+    } catch (error) {
+        showMessage(mensagem, error.message || "Erro ao cancelar presença.", "error");
     } finally {
-        mostrarLoading(false);
+        setButtonLoading(button, false);
     }
 }
 
-// Utilitários
-function atualizarSelectorRotas() {
-    rotaSelect.innerHTML = '<option value="">Selecione uma rota...</option>' +
-        rotas.map(r => `
-            <option value="${r.id}">
-                ${r.nome} - ${r.confirmados || 0}/${r.vagas_maximas} vagas
-            </option>
-        `).join("");
-}
-
-function exibirMensagem(texto, tipo) {
-    mensagem.textContent = texto;
-    mensagem.className = `message ${tipo}`;
-
-    // Auto-fechar mensagens após 5 segundos
-    if (tipo !== "error") {
-        setTimeout(() => {
-            mensagem.className = "message";
-        }, 5000);
+async function recarregarRotaAtual() {
+    const data = await apiFetch("/rotas");
+    rotas = Array.isArray(data) ? data.map(normalizeRoute) : [];
+    atualizarSelectRotas();
+    const atualizada = rotas.find((rota) => String(rota.id) === String(rotaAtual.id));
+    if (atualizada) {
+        document.getElementById("rotaSelect").value = atualizada.id;
+        await carregarDetalhesRota(atualizada);
     }
 }
 
-function mostrarLoading(ativo) {
-    loading.style.display = ativo ? "block" : "none";
+function mostrarEstadoVazio(titulo = "Nenhuma rota selecionada", texto = "Selecione uma rota acima para visualizar informações de vagas e participantes.") {
+    document.getElementById("rotaInfo").classList.add("hidden");
+    const empty = document.getElementById("emptyState");
+    empty.classList.remove("hidden");
+    empty.innerHTML = `
+        <div class="empty-state-icon">🚌</div>
+        <h3>${escapeHTML(titulo)}</h3>
+        <p>${escapeHTML(texto)}</p>
+    `;
 }
