@@ -1,46 +1,37 @@
-const API_BASE = "http://localhost:3000";
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("loginForm");
+    const feedback = document.getElementById("feedback");
+    const button = document.getElementById("loginButton");
 
-const loginForm = document.getElementById("loginForm");
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearMessage(feedback);
 
-loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+        const dados = {
+            email: document.getElementById("email").value.trim(),
+            senha: document.getElementById("senha").value
+        };
 
-    const dados = {
-        email: document.getElementById("email").value,
-        senha: document.getElementById("senha").value
-    };
-
-    try {
-
-        const response = await fetch(
-            `${API_BASE}/usuarios/login`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                 credentials: "include",
-                body: JSON.stringify(dados)
-            }
-        );
-
-        const resultado = await response.json();
-
-        if (response.ok) {
-
-            alert(resultado.mensagem);
-
-            window.location.href = "perfil.html";
-
-        } else {
-
-            alert(resultado.erro || "Erro ao fazer login");
+        if (!dados.email || !dados.senha) {
+            showMessage(feedback, "Informe e-mail e senha para continuar.", "warning");
+            return;
         }
 
-    } catch (erro) {
+        try {
+            setButtonLoading(button, true, "Entrando...");
+            const resultado = await apiFetch("/usuarios/login", {
+                method: "POST",
+                body: JSON.stringify(dados)
+            });
 
-        console.error(erro);
-
-        alert("Erro ao conectar com o servidor");
-    }
+            showMessage(feedback, resultado.mensagem || "Login realizado com sucesso.", "success");
+            setTimeout(() => {
+                window.location.href = "rotas.html";
+            }, 550);
+        } catch (error) {
+            showMessage(feedback, error.message || "Erro ao fazer login.", "error");
+        } finally {
+            setButtonLoading(button, false);
+        }
+    });
 });

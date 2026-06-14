@@ -70,6 +70,31 @@ async function confirmarPresenca(usuario_id, rota_id,status) {
             throw new Error("Usuário não participa desta rota");
         }
 
+        const rota = await db.query(
+            `SELECT 
+                vagas_maximas,
+                (
+                    SELECT COUNT(*)
+                    FROM confirmacao
+                    WHERE rota_id = $1
+                    AND usuario_id <> $2
+                    AND status != 'CANCELADO'
+                ) AS vagas_usadas
+             FROM rota
+             WHERE id = $1`,
+            [rota_id, usuario_id]
+        );
+
+        if (rota.rows.length === 0) {
+            throw new Error("Rota não encontrada");
+        }
+
+        const { vagas_maximas, vagas_usadas } = rota.rows[0];
+
+        if (String(status).toUpperCase() !== "CANCELADO" && parseInt(vagas_usadas) >= parseInt(vagas_maximas)) {
+            throw new Error("Rota cheia, não há vagas disponíveis");
+        }
+
                // Insere ou atualiza confirmação
         const resultado = await db.query(
             `INSERT INTO confirmacao (usuario_id, rota_id, status)

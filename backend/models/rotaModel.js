@@ -1,13 +1,32 @@
 const db = require("../config/db");
 
+const SELECT_ROTAS_COM_OCUPACAO = `
+    SELECT
+        r.*,
+        (
+            SELECT COUNT(*)::int
+            FROM confirmacao c
+            WHERE c.rota_id = r.id
+            AND COALESCE(c.status, '') <> 'CANCELADO'
+        ) AS confirmados
+    FROM rota r
+`;
+
 async function listarRotas() {
-    const resultado = await db.query("SELECT * FROM rota");
+    const resultado = await db.query(`
+        ${SELECT_ROTAS_COM_OCUPACAO}
+        ORDER BY r.id DESC
+    `);
+
     return resultado.rows;
 }
 
 async function buscarRotaPorId(id) {
     const resultado = await db.query(
-        "SELECT * FROM rota WHERE id = $1",
+        `
+        ${SELECT_ROTAS_COM_OCUPACAO}
+        WHERE r.id = $1
+        `,
         [id]
     );
 
@@ -60,7 +79,6 @@ async function criarRota(dados) {
 }
 
 async function atualizarRota(id, dados) {
-
     const {
         nome,
         descricao,
@@ -104,7 +122,6 @@ async function atualizarRota(id, dados) {
 }
 
 async function deletarRota(id) {
-
     const resultado = await db.query(
         `DELETE FROM rota
          WHERE id = $1
@@ -116,15 +133,16 @@ async function deletarRota(id) {
 }
 
 async function buscarRotaPorCodigo(codigo) {
-
     const resultado = await db.query(
-        "SELECT * FROM rota WHERE codigo = $1",
+        `
+        ${SELECT_ROTAS_COM_OCUPACAO}
+        WHERE r.codigo = $1
+        `,
         [codigo]
     );
 
     return resultado.rows[0];
 }
-
 
 module.exports = {
     listarRotas,
