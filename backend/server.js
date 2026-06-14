@@ -34,6 +34,8 @@ app.use("/usuarios", usuarioRoutes);
 
 app.use("/participacao", participacaoRoutes);
 
+app.use(express.static('../frontend'));
+
 app.listen(3000, () => {
     console.log("Servidor rodando na porta 3000");
 });
