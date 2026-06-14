@@ -1,10 +1,13 @@
 const participacaoModel = require("../models/participacaoModel");
+const rotaModel = require("../models/rotaModel");
 
 // Entrar em uma rota
 async function entrarEmRota(req, res) {
+    console.log(req.body);
     try {
-        const { rota_id } = req.body;
-        const usuario_id = req.session.usuario_id; // Obtém do session
+
+        const { codigo } = req.body;
+        const usuario_id = req.session.usuario_id;
 
         if (!usuario_id) {
             return res.status(401).json({
@@ -12,26 +15,40 @@ async function entrarEmRota(req, res) {
             });
         }
 
-        if (!rota_id) {
+        if (!codigo) {
             return res.status(400).json({
-                mensagem: "rota_id é obrigatório"
+                mensagem: "Código da rota é obrigatório"
             });
         }
 
-        const participacao = await participacaoModel.entrarEmRota(usuario_id, rota_id);
+        const rota = await rotaModel.buscarRotaPorCodigo(codigo);
 
-       return res.status(201).json({
+        if (!rota) {
+            return res.status(404).json({
+                mensagem: "Código da rota inválido"
+            });
+        }
+
+        const participacao =
+            await participacaoModel.entrarEmRota(
+                usuario_id,
+                rota.id
+            );
+
+        return res.status(201).json({
             mensagem: "Entrada na rota realizada com sucesso",
             participacao
         });
+
     } catch (erro) {
+
         console.error(erro);
-      return  res.status(500).json({
+
+        return res.status(500).json({
             mensagem: erro.message || "Erro ao entrar em rota"
         });
     }
 }
-
 // Confirmar presença
 async function confirmarPresenca(req, res) {
     try {

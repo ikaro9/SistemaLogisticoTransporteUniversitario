@@ -84,12 +84,14 @@ const UsuarioController = {
   },
 
   async sessaoAtual(req, res) {
-    if (!req.session.usuarioId) {
+
+    console.log(req.session);
+    if (!req.session.usuario_id) {
       return res.status(401).json({ erro: 'Nenhuma sessão ativa.' });
     }
 
     try {
-      const usuario = await UsuarioModel.buscarPorId(req.session.usuarioId);
+      const usuario = await UsuarioModel.buscarPorId(req.session.usuario_id);
       if (!usuario) {
         req.session.destroy();
         return res.status(401).json({ erro: 'Usuário não encontrado.' });
@@ -132,7 +134,7 @@ async  buscarUsuarioPorId(req, res) {
         const { id } = req.params;
 
         const usuario =
-            await usuarioModel.buscarUsuarioPorId(id);
+            await UsuarioModel.buscarPorId(id);
 
         if (!usuario) {
 
@@ -160,10 +162,23 @@ async  atualizarUsuario(req, res) {
 
         const { id } = req.params;
 
+        const usuarioLogado = req.session.usuario_id;
+
+if (parseInt(id) !== usuarioLogado) {
+    return res.status(403).json({
+        mensagem: "Você só pode editar seu próprio usuário"
+    });
+}
+        const dados = { ...req.body };
+
+        if (dados.senha) {
+            dados.senha = await bcrypt.hash(dados.senha, 10);
+        }
+
         const usuarioAtualizado =
-            await usuarioModel.atualizarUsuario(
+            await UsuarioModel.atualizarUsuario(
                 id,
-                req.body
+                dados
             );
 
         if (!usuarioAtualizado) {
@@ -193,7 +208,7 @@ async deletarUsuario(req, res) {
         const { id } = req.params;
 
         const usuarioDeletado =
-            await usuarioModel.deletarUsuario(id);
+            await UsuarioModel.deletarUsuario(id);
 
         if (!usuarioDeletado) {
 

@@ -114,9 +114,22 @@ async function deletarRota(id) {
 
     return resultado.rows[0];
 }
+
+async function buscarRotaPorCodigo(codigo) {
+
+    const resultado = await db.query(
+        "SELECT * FROM rota WHERE codigo = $1",
+        [codigo]
+    );
+
+    return resultado.rows[0];
+}
+
+
 module.exports = {
     listarRotas,
     buscarRotaPorId,
+    buscarRotaPorCodigo,
     criarRota,
     atualizarRota,
     deletarRota

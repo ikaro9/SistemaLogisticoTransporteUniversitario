@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router = express.Router();
 
@@ -17,8 +18,7 @@ router.post("/confirmar", participacaoController.confirmarPresenca);
 router.post("/cancelar", participacaoController.cancelarPresenca);
 
 // Listar participantes de uma rota
-router.get("/participantes/:rota_id", participacaoController.listarParticipantes);
-
+router.get("/rota/:rota_id", participacaoController.listarParticipantes);
 // Verificar status de participação do usuário em uma rota
 router.get("/verificar/:rota_id", participacaoController.verificarParticipacao);
 
