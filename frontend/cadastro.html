@@ -13,36 +13,63 @@
 
         <h1>Cadastro</h1>
 
-        <form>
+        <form id="cadastroForm">
 
             <label>Nome</label>
-            <input type="text" placeholder="Digite seu nome">
+            <input
+                id="nome"
+                type="text"
+                placeholder="Digite seu nome"
+                required
+            >
 
             <label>Email</label>
-            <input type="email" placeholder="Digite seu email">
+            <input
+                id="email"
+                type="email"
+                placeholder="Digite seu email"
+                required
+            >
 
             <label>Telefone</label>
-            <input type="text" placeholder="Digite seu telefone">
+            <input
+                id="telefone"
+                type="text"
+                placeholder="Digite seu telefone"
+                required
+            >
 
             <label>Cidade</label>
-            <input type="text" placeholder="Digite sua cidade">
+            <input
+                id="cidade"
+                type="text"
+                placeholder="Digite sua cidade"
+                required
+            >
 
             <label>Senha</label>
-            <input type="password" placeholder="Digite sua senha">
+            <input
+                id="senha"
+                type="password"
+                placeholder="Digite sua senha"
+                required
+            >
 
             <label>Tipo de Perfil</label>
 
-            <select>
-                <option>Aluno</option>
-                <option>Motorista</option>
+            <select id="tipo_perfil" required>
+                <option value="">Selecione</option>
+                <option value="Aluno">Aluno</option>
+                <option value="Motorista">Motorista</option>
             </select>
 
             <label>Instituição</label>
 
-            <select>
-                <option>UFERSA</option>
-                <option>IFRN</option>
-                <option>FACEP</option>
+            <select id="instituicao" required>
+                <option value="">Selecione</option>
+                <option value="UFERSA">UFERSA</option>
+                <option value="IFRN">IFRN</option>
+                <option value="FACEP">FACEP</option>
             </select>
 
             <button type="submit">
@@ -59,6 +86,8 @@
         </p>
 
     </div>
+
+    <script src="js/cadastro.js"></script>
 
 </body>
 </html>
