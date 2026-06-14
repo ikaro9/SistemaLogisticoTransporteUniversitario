@@ -8,7 +8,7 @@ const UsuarioController = {
       const { nome, email, senha, telefone, cidade, tipo_perfil, instituicao } = req.body;
 
       if (!nome || !email || !senha || !telefone || !cidade || !tipo_perfil || !instituicao) {
-        return res.status(400).json({ erro: 'Todos os campos sao obrigatorios.' });
+        return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
       }
 
       const usuarioExistente = await UsuarioModel.buscarPorEmail(email);
@@ -17,9 +17,12 @@ const UsuarioController = {
       }
 
       const senhaHash = await bcrypt.hash(senha, 10);
+      const tipoPerfilFormatado = tipo_perfil.toUpperCase();
 
       const novoUsuario = await UsuarioModel.criar({
-        nome, email, senhaHash, telefone, cidade, tipo_perfil, instituicao
+        nome, email, senhaHash, telefone, cidade,
+        tipo_perfil: tipoPerfilFormatado,
+        instituicao
       });
 
       return res.status(201).json({
@@ -54,9 +57,9 @@ const UsuarioController = {
         return res.status(401).json({ erro: 'Email ou senha inválidos.' });
       }
 
-  req.session.usuario_id = usuario.id;
-  req.session.usuario_nome = usuario.nome;
-  req.session.usuario_tipo = usuario.tipo_perfil;
+      req.session.usuario_id = usuario.id;
+      req.session.usuario_nome = usuario.nome;
+      req.session.usuario_tipo = usuario.tipo_perfil;
 
       return res.status(200).json({
         mensagem: `Bem-vindo, ${usuario.nome}!`,
@@ -107,131 +110,131 @@ const UsuarioController = {
     }
   },
 
-   async  listarUsuarios(req, res) {
+  async listarUsuarios(req, res) {
 
     try {
 
-        const usuarios =
-            await UsuarioModel.listarUsuarios();
+      const usuarios =
+        await UsuarioModel.listarUsuarios();
 
-        res.status(200).json(usuarios);
+      res.status(200).json(usuarios);
 
     } catch (erro) {
 
-        console.error(erro);
+      console.error(erro);
 
-        res.status(500).json({
-            mensagem: "Erro ao listar usuários",
-            erro: erro.message
-        });
+      res.status(500).json({
+        mensagem: "Erro ao listar usuários",
+        erro: erro.message
+      });
     }
-},
+  },
 
-async  buscarUsuarioPorId(req, res) {
+  async buscarUsuarioPorId(req, res) {
 
     try {
 
-        const { id } = req.params;
+      const { id } = req.params;
 
-        const usuario =
-            await UsuarioModel.buscarPorId(id);
+      const usuario =
+        await UsuarioModel.buscarPorId(id);
 
-        if (!usuario) {
+      if (!usuario) {
 
-            return res.status(404).json({
-                mensagem: "Usuário não encontrado"
-            });
-        }
+        return res.status(404).json({
+          mensagem: "Usuário não encontrado"
+        });
+      }
 
-        res.status(200).json(usuario);
+      res.status(200).json(usuario);
 
     } catch (erro) {
 
-        console.error(erro);
+      console.error(erro);
 
-        res.status(500).json({
-            mensagem: "Erro ao buscar usuário",
-            erro: erro.message
-        });
+      res.status(500).json({
+        mensagem: "Erro ao buscar usuário",
+        erro: erro.message
+      });
     }
-},
+  },
 
-async  atualizarUsuario(req, res) {
+  async atualizarUsuario(req, res) {
 
     try {
 
-        const { id } = req.params;
+      const { id } = req.params;
 
-        const usuarioLogado = req.session.usuario_id;
+      const usuarioLogado = req.session.usuario_id;
 
-if (parseInt(id) !== usuarioLogado) {
-    return res.status(403).json({
-        mensagem: "Você só pode editar seu próprio usuário"
-    });
-}
-        const dados = { ...req.body };
+      if (parseInt(id) !== usuarioLogado) {
+        return res.status(403).json({
+          mensagem: "Você só pode editar seu próprio usuário"
+        });
+      }
+      const dados = { ...req.body };
 
-        if (dados.senha) {
-            dados.senha = await bcrypt.hash(dados.senha, 10);
-        }
+      if (dados.senha) {
+        dados.senha = await bcrypt.hash(dados.senha, 10);
+      }
 
-        const usuarioAtualizado =
-            await UsuarioModel.atualizarUsuario(
-                id,
-                dados
-            );
+      const usuarioAtualizado =
+        await UsuarioModel.atualizarUsuario(
+          id,
+          dados
+        );
 
-        if (!usuarioAtualizado) {
+      if (!usuarioAtualizado) {
 
-            return res.status(404).json({
-                mensagem: "Usuário não encontrado"
-            });
-        }
+        return res.status(404).json({
+          mensagem: "Usuário não encontrado"
+        });
+      }
 
-        res.status(200).json(usuarioAtualizado);
+      res.status(200).json(usuarioAtualizado);
 
     } catch (erro) {
 
-        console.error(erro);
+      console.error(erro);
 
-        res.status(500).json({
-            mensagem: "Erro ao atualizar usuário",
-            erro: erro.message
-        });
+      res.status(500).json({
+        mensagem: "Erro ao atualizar usuário",
+        erro: erro.message
+      });
     }
-},
+  },
 
-async deletarUsuario(req, res) {
+  async deletarUsuario(req, res) {
 
     try {
 
-        const { id } = req.params;
+      const { id } = req.params;
 
-        const usuarioDeletado =
-            await UsuarioModel.deletarUsuario(id);
+      const usuarioDeletado =
+        await UsuarioModel.deletarUsuario(id);
 
-        if (!usuarioDeletado) {
+      if (!usuarioDeletado) {
 
-            return res.status(404).json({
-                mensagem: "Usuário não encontrado"
-            });
-        }
-
-        res.status(200).json({
-            mensagem: "Usuário removido com sucesso",
-            usuario: usuarioDeletado
+        return res.status(404).json({
+          mensagem: "Usuário não encontrado"
         });
+      }
+
+      res.status(200).json({
+        mensagem: "Usuário removido com sucesso",
+        usuario: usuarioDeletado
+      });
 
     } catch (erro) {
 
-        console.error(erro);
+      console.error(erro);
 
-        res.status(500).json({
-            mensagem: "Erro ao remover usuário",
-            erro: erro.message
-        });
+      res.status(500).json({
+        mensagem: "Erro ao remover usuário",
+        erro: erro.message
+      });
     }
-}
+  }
 
 };
 
