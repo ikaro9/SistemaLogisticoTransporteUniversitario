@@ -2,6 +2,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("cadastroForm");
     const feedback = document.getElementById("feedback");
     const button = document.getElementById("cadastroButton");
+    const tipoPerfil = document.getElementById("tipo_perfil");
+    const instituicao = document.getElementById("instituicao");
+    const instituicaoField = document.getElementById("instituicaoField");
+
+    function atualizarCampoInstituicao() {
+        const motorista = tipoPerfil.value === "MOTORISTA";
+        instituicao.required = !motorista;
+        instituicao.disabled = motorista;
+        instituicaoField.classList.toggle("hidden", motorista);
+
+        if (motorista) {
+            instituicao.value = "";
+        }
+    }
+
+    tipoPerfil.addEventListener("change", atualizarCampoInstituicao);
+    atualizarCampoInstituicao();
 
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -13,13 +30,26 @@ document.addEventListener("DOMContentLoaded", () => {
             telefone: document.getElementById("telefone").value.trim(),
             cidade: document.getElementById("cidade").value.trim(),
             senha: document.getElementById("senha").value,
-            tipo_perfil: document.getElementById("tipo_perfil").value,
-            instituicao: document.getElementById("instituicao").value
+            tipo_perfil: tipoPerfil.value,
+            instituicao: tipoPerfil.value === "MOTORISTA" ? null : instituicao.value
         };
 
-        const camposVazios = Object.values(dados).some((valor) => !valor);
-        if (camposVazios) {
+        const camposObrigatorios = [
+            dados.nome,
+            dados.email,
+            dados.telefone,
+            dados.cidade,
+            dados.senha,
+            dados.tipo_perfil
+        ];
+
+        if (camposObrigatorios.some((valor) => !valor)) {
             showMessage(feedback, "Preencha todos os campos obrigatórios.", "warning");
+            return;
+        }
+
+        if (dados.tipo_perfil !== "MOTORISTA" && !dados.instituicao) {
+            showMessage(feedback, "Informe a instituição para aluno ou administrador.", "warning");
             return;
         }
 

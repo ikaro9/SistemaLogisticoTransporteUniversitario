@@ -7,8 +7,19 @@ const UsuarioController = {
     try {
       const { nome, email, senha, telefone, cidade, tipo_perfil, instituicao } = req.body;
 
-      if (!nome || !email || !senha || !telefone || !cidade || !tipo_perfil || !instituicao) {
-        return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
+      const tipoPerfilFormatado = String(tipo_perfil || '').toUpperCase();
+      const perfisPermitidos = ['ALUNO', 'MOTORISTA', 'ADMIN'];
+
+      if (!nome || !email || !senha || !telefone || !cidade || !tipoPerfilFormatado) {
+        return res.status(400).json({ erro: 'Todos os campos obrigatórios devem ser preenchidos.' });
+      }
+
+      if (!perfisPermitidos.includes(tipoPerfilFormatado)) {
+        return res.status(400).json({ erro: 'Tipo de perfil inválido.' });
+      }
+
+      if (tipoPerfilFormatado !== 'MOTORISTA' && !instituicao) {
+        return res.status(400).json({ erro: 'A instituição é obrigatória para alunos e administradores.' });
       }
 
       const usuarioExistente = await UsuarioModel.buscarPorEmail(email);
@@ -17,12 +28,12 @@ const UsuarioController = {
       }
 
       const senhaHash = await bcrypt.hash(senha, 10);
-      const tipoPerfilFormatado = tipo_perfil.toUpperCase();
+      const instituicaoFormatada = tipoPerfilFormatado === 'MOTORISTA' ? null : instituicao;
 
       const novoUsuario = await UsuarioModel.criar({
         nome, email, senhaHash, telefone, cidade,
         tipo_perfil: tipoPerfilFormatado,
-        instituicao
+        instituicao: instituicaoFormatada
       });
 
       return res.status(201).json({

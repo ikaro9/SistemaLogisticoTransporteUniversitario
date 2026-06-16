@@ -64,7 +64,7 @@
                     </select>
                 </div>
 
-                <div class="field" style="grid-column: 1 / -1;">
+                <div id="instituicaoField" class="field" style="grid-column: 1 / -1;">
                     <label for="instituicao">Instituição</label>
                     <select id="instituicao" name="instituicao" required>
                         <option value="">Selecione</option>
@@ -73,6 +73,7 @@
                         <option value="FACEP">FACEP</option>
                         <option value="Outra">Outra</option>
                     </select>
+                    <small class="field-hint">Obrigatório para alunos e administradores. Motoristas não precisam informar instituição.</small>
                 </div>
 
                 <button id="cadastroButton" class="btn btn-full" type="submit" style="grid-column: 1 / -1;">Cadastrar</button>
@@ -81,6 +82,11 @@
             <p class="auth-footer">Já possui conta? <a href="login.html">Entrar</a></p>
         </section>
     </main>
+
+    <footer class="site-footer">
+        <p>Sistema Logístico Transporte Universitário desenvolvido para a disciplina de Engenharia de Software.</p>
+        <p>Componentes: Ikaro Ferreira, Alexssandro Rocha, Gabriel Paiva e Artur Carvalho — UFERSA.</p>
+    </footer>
 
     <script src="js/app.js"></script>
     <script src="js/cadastro.js"></script>

@@ -22,11 +22,13 @@ function bindEventosRotas() {
         renderRotas();
     });
 
-    codigoForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const codigo = document.getElementById("codigoRota").value.trim();
-        await entrarPorCodigo(codigo);
-    });
+    if (codigoForm) {
+        codigoForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const codigo = document.getElementById("codigoRota").value.trim();
+            await entrarPorCodigo(codigo);
+        });
+    }
 
     if (rotaForm) {
         rotaForm.addEventListener("submit", cadastrarRota);
@@ -137,7 +139,7 @@ function renderRotaCard(rota) {
 }
 
 async function entrarPorCodigo(codigo, button = null) {
-    const feedback = document.getElementById("codigoFeedback");
+    const feedback = document.getElementById("codigoFeedback") || document.getElementById("rotasFeedback");
 
     if (!codigo) {
         showMessage(feedback, "Informe o código da rota.", "warning");
@@ -154,7 +156,8 @@ async function entrarPorCodigo(codigo, button = null) {
         });
 
         showMessage(feedback, resultado.mensagem || "Entrada na rota realizada com sucesso.", "success");
-        document.getElementById("codigoRota").value = "";
+        const codigoInput = document.getElementById("codigoRota");
+        if (codigoInput) codigoInput.value = "";
         await carregarRotas();
     } catch (error) {
         showMessage(feedback, error.message || "Erro ao entrar na rota.", "error");

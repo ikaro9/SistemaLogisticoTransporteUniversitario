@@ -20,24 +20,11 @@
     </header>
 
     <main class="app-main">
-        <section class="page-hero">
-            <div class="hero-card">
-                <div class="badge">Participação</div>
-                <h1>Gerencie presença e participantes</h1>
-                <p>Selecione uma rota, veja a ocupação, entre na rota, confirme presença ou cancele sua confirmação quando necessário.</p>
-                <div class="hero-actions">
-                    <a href="rotas.html" class="btn">Ver todas as rotas</a>
-                </div>
+        <section class="toolbar compact-toolbar" aria-label="Seleção de rota">
+            <div class="field route-select-field">
+                <label for="rotaSelect">Selecionar rota</label>
+                <select id="rotaSelect"><option value="">Carregando rotas...</option></select>
             </div>
-
-            <aside class="quick-card card">
-                <h3>Selecionar rota</h3>
-                <p>Escolha a rota desejada para carregar os detalhes.</p>
-                <div class="field">
-                    <label for="rotaSelect">Rota</label>
-                    <select id="rotaSelect"><option value="">Carregando rotas...</option></select>
-                </div>
-            </aside>
         </section>
 
         <div id="mensagem" class="message" role="alert"></div>
@@ -103,6 +90,11 @@
             </article>
         </section>
     </main>
+
+    <footer class="site-footer">
+        <p>Sistema Logístico Transporte Universitário desenvolvido para a disciplina de Engenharia de Software.</p>
+        <p>Componentes: Ikaro Ferreira, Alexssandro Rocha, Gabriel Paiva e Artur Carvalho — UFERSA.</p>
+    </footer>
 
     <script src="js/app.js"></script>
     <script src="js/participantes.js"></script>
