@@ -1,9 +1,7 @@
 const db = require("../config/db");
 
-// Entrar em uma rota (criar participação)
 async function entrarEmRota(usuario_id, rota_id) {
     try {
-        // Verificar se o usuário já participa desta rota
         const existente = await db.query(
             "SELECT * FROM participacao WHERE usuario_id = $1 AND rota_id = $2",
             [usuario_id, rota_id]
@@ -13,7 +11,6 @@ async function entrarEmRota(usuario_id, rota_id) {
             throw new Error("Usuário já está participando desta rota");
         }
 
-       // Verifica se a rota existe e vagas disponíveis
         const rota = await db.query(
             `SELECT 
                 id, 
@@ -39,7 +36,6 @@ async function entrarEmRota(usuario_id, rota_id) {
             throw new Error("Rota cheia, não há vagas disponíveis");
         }
 
-        // Criar participação
      const resultado = await db.query(
     `INSERT INTO participacao
     (
@@ -57,10 +53,8 @@ async function entrarEmRota(usuario_id, rota_id) {
     }
 }
 
-// Confirmar presença na rota
 async function confirmarPresenca(usuario_id, rota_id,status) {
     try {
-        // Verificar se participa da rota
         const participacao = await db.query(
             "SELECT id FROM participacao WHERE usuario_id = $1 AND rota_id = $2",
             [usuario_id, rota_id]
@@ -95,7 +89,6 @@ async function confirmarPresenca(usuario_id, rota_id,status) {
             throw new Error("Rota cheia, não há vagas disponíveis");
         }
 
-               // Insere ou atualiza confirmação
         const resultado = await db.query(
             `INSERT INTO confirmacao (usuario_id, rota_id, status)
              VALUES ($1, $2, $3)
@@ -114,10 +107,8 @@ async function confirmarPresenca(usuario_id, rota_id,status) {
     }
 }
 
-// Cancelar presença
 async function cancelarPresenca(usuario_id, rota_id) {
     try {
-        // Remover confirmação
         const resultado = await db.query(
             `UPDATE confirmacao 
              SET status = 'CANCELADO', data_confirmacao = NOW()
@@ -136,7 +127,6 @@ async function cancelarPresenca(usuario_id, rota_id) {
     }
 }
 
-// Listar participantes de uma rota
 async function listarParticipantes(rota_id) {
     try {
         const resultado = await db.query(
@@ -165,7 +155,6 @@ async function listarParticipantes(rota_id) {
     }
 }
 
-// Verificar status de participação do usuário em uma rota
 async function verificarParticipacao(usuario_id, rota_id) {
     try {
         const resultado = await db.query(
@@ -189,7 +178,6 @@ async function verificarParticipacao(usuario_id, rota_id) {
     }
 }
 
-// Listar rotas do usuário
 async function listarMinhasRotas(usuario_id) {
     try {
         const resultado = await db.query(

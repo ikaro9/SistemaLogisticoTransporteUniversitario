@@ -7,13 +7,11 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const authorize = require("../middlewares/authorize");
 
 
-// 🔓 LISTAR ROTAS (qualquer logado ou até público se quiser)
 router.get("/", rotaController.listarRotas);
 
 router.get("/:id", rotaController.buscarRotaPorId);
 
 
-// 🔒 PROTEGIDO (SÓ ADMIN pode gerenciar rotas)
 router.post(
     "/",
     authMiddleware,

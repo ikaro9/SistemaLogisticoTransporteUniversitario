@@ -5,13 +5,11 @@ const router = express.Router();
 const usuarioController =
     require("../controllers/usuarioController");
 
-// Autenticação
 router.post("/cadastro", usuarioController.cadastrar);
 router.post("/login", usuarioController.login);
 router.post("/logout", usuarioController.logout);
 router.get("/sessao", usuarioController.sessaoAtual);
 
-// CRUD de usuários
 router.get("/", usuarioController.listarUsuarios);
 router.get("/:id", usuarioController.buscarUsuarioPorId);
 router.put("/:id", usuarioController.atualizarUsuario);

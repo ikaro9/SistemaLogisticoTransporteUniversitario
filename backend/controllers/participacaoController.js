@@ -1,7 +1,6 @@
 const participacaoModel = require("../models/participacaoModel");
 const rotaModel = require("../models/rotaModel");
 
-// Entrar em uma rota
 async function entrarEmRota(req, res) {
     console.log(req.body);
     try {
@@ -51,7 +50,7 @@ async function entrarEmRota(req, res) {
         });
     }
 }
-// Confirmar presença
+
 async function confirmarPresenca(req, res) {
     try {
         const { rota_id, status} = req.body;
@@ -83,7 +82,7 @@ async function confirmarPresenca(req, res) {
     }
 }
 
-// Cancelar presença
+
 async function cancelarPresenca(req, res) {
     try {
         const { rota_id } = req.body;
@@ -115,7 +114,6 @@ async function cancelarPresenca(req, res) {
     }
 }
 
-// Listar participantes de uma rota
 async function listarParticipantes(req, res) {
     try {
         const { rota_id } = req.params;
@@ -137,7 +135,6 @@ async function listarParticipantes(req, res) {
     }
 }
 
-// Verificar status de participação
 async function verificarParticipacao(req, res) {
     try {
         const { rota_id } = req.params;
@@ -163,7 +160,6 @@ async function verificarParticipacao(req, res) {
     }
 }
 
-// Listar minhas rotas (rotas em que o usuário participa)
 async function listarMinhasRotas(req, res) {
     try {
         const usuario_id = req.session.usuario_id;
