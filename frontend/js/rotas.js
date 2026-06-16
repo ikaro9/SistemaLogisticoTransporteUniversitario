@@ -67,9 +67,6 @@ function renderResumo() {
     const totalDisponiveis = Math.max(totalVagas - totalConfirmados, 0);
 
     document.getElementById("totalRotas").textContent = totalRotas;
-    document.getElementById("totalVagas").textContent = totalVagas;
-    document.getElementById("totalConfirmados").textContent = totalConfirmados;
-    document.getElementById("totalDisponiveis").textContent = totalDisponiveis;
 }
 
 function renderRotas() {
