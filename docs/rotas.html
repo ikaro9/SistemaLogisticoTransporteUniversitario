@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotas | Transporte Universitário</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="app-page">
+    <header class="app-header">
+        <nav class="navbar" aria-label="Navegação principal">
+            <a class="nav-brand" href="rotas.html"><span class="brand-icon">🚌</span> Transporte Universitário</a>
+            <div class="nav-menu">
+                <a class="nav-link" data-page="rotas" href="rotas.html">Rotas</a>
+                <a class="nav-link" data-page="participantes" href="participantes.html">Participação</a>
+                <a class="nav-link" data-page="perfil" href="perfil.html">Perfil</a>
+                <button id="logoutButton" class="btn btn-secondary" type="button">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="app-main">
+        <section class="stats-grid" aria-label="Resumo das rotas">
+            <div class="stat-card"><span>Total de rotas</span><strong id="totalRotas">0</strong></div>
+            <div class="stat-card"><span>Total de vagas</span><strong id="totalVagas">0</strong></div>
+            <div class="stat-card"><span>Vagas ocupadas</span><strong id="totalConfirmados">0</strong></div>
+            <div class="stat-card"><span>Disponíveis</span><strong id="totalDisponiveis">0</strong></div>
+        </section>
+
+        <section class="toolbar" aria-label="Filtros de rotas">
+            <div class="section-title">
+                <h2>Lista de rotas</h2>
+                <p class="card-muted">Escolha uma rota para ver participantes ou confirmar presença.</p>
+            </div>
+            <label class="sr-only" for="buscaRotas">Buscar rota</label>
+            <input id="buscaRotas" class="search-input" type="search" placeholder="Buscar por nome, código, veículo ou placa...">
+        </section>
+
+        <div id="rotasFeedback" class="message" role="alert"></div>
+        <div id="rotasLoading" class="loading"><div class="spinner"></div><span>Carregando rotas...</span></div>
+        <section id="rotasGrid" class="grid routes-grid" aria-live="polite"></section>
+
+        <section id="adminPanel" class="form-card hidden" style="margin-top: 22px;" aria-labelledby="admin-title">
+            <h2 id="admin-title">Cadastrar nova rota</h2>
+            <p class="card-muted">Área exibida para usuários com perfil ADMIN.</p>
+            <div id="adminFeedback" class="message" role="alert"></div>
+            <form id="rotaForm" class="form-grid two-columns">
+                <div class="field"><label for="nomeRota">Nome da rota</label><input id="nomeRota" required placeholder="Ex.: UFERSA → Centro"></div>
+                <div class="field"><label for="codigoNovaRota">Código</label><input id="codigoNovaRota" required placeholder="Ex.: ROTA-01"></div>
+                <div class="field"><label for="vagasMaximas">Vagas máximas</label><input id="vagasMaximas" type="number" min="1" required placeholder="Ex.: 20"></div>
+                <div class="field"><label for="nomeVeiculo">Veículo</label><input id="nomeVeiculo" placeholder="Ex.: Ônibus escolar"></div>
+                <div class="field"><label for="corVeiculo">Cor</label><input id="corVeiculo" placeholder="Ex.: Branco"></div>
+                <div class="field"><label for="placaVeiculo">Placa</label><input id="placaVeiculo" required placeholder="Ex.: ABC1D23"></div>
+                <div class="field" style="grid-column: 1 / -1;"><label for="descricaoRota">Descrição</label><textarea id="descricaoRota" placeholder="Informe origem, destino, pontos de parada e horário de referência."></textarea></div>
+                <button id="rotaButton" class="btn" type="submit" style="grid-column: 1 / -1;">Cadastrar rota</button>
+            </form>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>Sistema Logístico Transporte Universitário desenvolvido para a disciplina de Engenharia de Software.</p>
+        <p>Componentes: Ikaro Ferreira, Alexssandro Rocha, Gabriel Paiva e Artur Carvalho — UFERSA.</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script src="js/rotas.js"></script>
+</body>
+</html>

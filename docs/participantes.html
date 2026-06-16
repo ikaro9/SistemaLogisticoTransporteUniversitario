@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participação | Transporte Universitário</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="app-page">
+    <header class="app-header">
+        <nav class="navbar" aria-label="Navegação principal">
+            <a class="nav-brand" href="rotas.html"><span class="brand-icon">🚌</span> Transporte Universitário</a>
+            <div class="nav-menu">
+                <a class="nav-link" data-page="rotas" href="rotas.html">Rotas</a>
+                <a class="nav-link" data-page="participantes" href="participantes.html">Participação</a>
+                <a class="nav-link" data-page="perfil" href="perfil.html">Perfil</a>
+                <button id="logoutButton" class="btn btn-secondary" type="button">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="app-main">
+        <section class="toolbar compact-toolbar" aria-label="Seleção de rota">
+            <div class="field route-select-field">
+                <label for="rotaSelect">Selecionar rota</label>
+                <select id="rotaSelect"><option value="">Carregando rotas...</option></select>
+            </div>
+        </section>
+
+        <div id="mensagem" class="message" role="alert"></div>
+        <div id="loading" class="loading"><div class="spinner"></div><span>Carregando informações...</span></div>
+
+        <section id="emptyState" class="empty-state hidden">
+            <div class="empty-state-icon">🚌</div>
+            <h3>Nenhuma rota selecionada</h3>
+            <p>Selecione uma rota acima para visualizar informações de vagas e participantes.</p>
+        </section>
+
+        <section id="rotaInfo" class="panel-grid hidden" aria-live="polite">
+            <article class="route-card">
+                <div class="card-topline">
+                    <div>
+                        <span id="rotaCodigo" class="route-code">...</span>
+                        <h2 id="rotaNome" style="margin: 14px 0 8px;">...</h2>
+                    </div>
+                    <span id="statusRota" class="badge">...</span>
+                </div>
+                <p id="rotaDescricao">...</p>
+
+                <div class="meta-list">
+                    <div class="meta-item"><span>🚐</span><div><strong>Veículo</strong><br><span id="rotaVeiculo">...</span></div></div>
+                    <div class="meta-item"><span>🔖</span><div><strong>Placa</strong><br><span id="rotaPlaca">...</span></div></div>
+                    <div class="meta-item"><span>👥</span><div><strong>Ocupação</strong><br><span id="vagasTexto">...</span></div></div>
+                </div>
+
+                <div class="progress-wrap">
+                    <div class="progress-label"><span>Vagas preenchidas</span><strong id="vagasPercentual">0%</strong></div>
+                    <div class="progress-bar"><div id="vagasPreenchidas" class="progress-fill"></div></div>
+                </div>
+
+                <div id="suaParticipacao" class="message info show">
+                    <strong>Seu status:</strong> <span id="seuStatus">Verificando...</span>
+                </div>
+
+                <div id="confirmacaoControle" class="field hidden">
+                    <label for="statusConfirmacao">Tipo de confirmação</label>
+                    <select id="statusConfirmacao">
+                        <option value="IDA_VOLTA">Ida e volta</option>
+                        <option value="IDA">Somente ida</option>
+                        <option value="VOLTA">Somente volta</option>
+                    </select>
+                </div>
+
+                <div class="actions-row">
+                    <button id="btnEntrar" class="btn" type="button">Entrar nesta rota</button>
+                    <button id="btnConfirmar" class="btn btn-success" type="button">Confirmar presença</button>
+                    <button id="btnCancelar" class="btn btn-danger" type="button">Cancelar confirmação</button>
+                </div>
+            </article>
+
+            <article class="card">
+                <div class="card-topline">
+                    <div>
+                        <h2>Participantes</h2>
+                        <p class="card-muted">Usuários vinculados à rota selecionada.</p>
+                    </div>
+                    <span id="totalParticipantes" class="badge">0</span>
+                </div>
+                <div id="participantesList" class="participants-list"></div>
+            </article>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>Sistema Logístico Transporte Universitário desenvolvido para a disciplina de Engenharia de Software.</p>
+        <p>Componentes: Ikaro Ferreira, Alexssandro Rocha, Gabriel Paiva e Artur Carvalho — UFERSA.</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script src="js/participantes.js"></script>
+</body>
+</html>
