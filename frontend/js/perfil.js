@@ -27,7 +27,7 @@ async function carregarPerfil(usuarioSessao) {
         document.getElementById("telefone").textContent = usuario.telefone || "Não informado";
         document.getElementById("cidade").textContent = usuario.cidade || "Não informada";
         document.getElementById("tipo").textContent = usuario.tipo_perfil || "Não informado";
-        document.getElementById("instituicao").textContent = usuario.instituicao || "Não informada";
+        document.getElementById("instituicao").textContent = usuario.tipo_perfil === "MOTORISTA" ? "Não se aplica" : (usuario.instituicao || "Não informada");
     } catch (error) {
         showMessage(feedback, error.message || "Erro ao carregar perfil.", "error");
     } finally {

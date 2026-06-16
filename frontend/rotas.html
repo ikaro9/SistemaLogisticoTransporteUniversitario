@@ -20,31 +20,6 @@
     </header>
 
     <main class="app-main">
-        <section class="page-hero">
-            <div class="hero-card">
-                <div class="badge">Sistema Logístico</div>
-                <h1>Rotas disponíveis</h1>
-                <p>Consulte rotas cadastradas, veja a ocupação de vagas e entre em uma rota utilizando o código fornecido pelo responsável.</p>
-                <div class="hero-actions">
-                    <a href="participantes.html" class="btn">Gerenciar minha participação</a>
-                    <a href="perfil.html" class="btn btn-secondary">Ver meu perfil</a>
-                </div>
-            </div>
-
-            <aside class="quick-card card">
-                <h3>Entrar por código</h3>
-                <p>Digite o código da rota para solicitar sua participação.</p>
-                <div id="codigoFeedback" class="message" role="alert"></div>
-                <form id="codigoForm" class="form-grid">
-                    <div class="field">
-                        <label for="codigoRota">Código da rota</label>
-                        <input id="codigoRota" type="text" placeholder="Ex.: ROTA-01" required>
-                    </div>
-                    <button id="codigoButton" class="btn btn-full" type="submit">Entrar na rota</button>
-                </form>
-            </aside>
-        </section>
-
         <section class="stats-grid" aria-label="Resumo das rotas">
             <div class="stat-card"><span>Total de rotas</span><strong id="totalRotas">0</strong></div>
             <div class="stat-card"><span>Total de vagas</span><strong id="totalVagas">0</strong></div>
@@ -81,6 +56,11 @@
             </form>
         </section>
     </main>
+
+    <footer class="site-footer">
+        <p>Sistema Logístico Transporte Universitário desenvolvido para a disciplina de Engenharia de Software.</p>
+        <p>Componentes: Ikaro Ferreira, Alexssandro Rocha, Gabriel Paiva e Artur Carvalho — UFERSA.</p>
+    </footer>
 
     <script src="js/app.js"></script>
     <script src="js/rotas.js"></script>
