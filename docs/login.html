@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Transporte Universitário</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+    <main class="auth-layout">
+        <section class="auth-panel" aria-label="Apresentação do sistema">
+            <div>
+                <div class="brand-badge"><span class="brand-icon">🚌</span> Transporte Universitário</div>
+                <h1>Gestão simples para rotas acadêmicas.</h1>
+                <p>Organize rotas, confirme presença, acompanhe vagas e consulte participantes em uma interface objetiva para alunos, motoristas e administradores.</p>
+            </div>
+
+            <div class="feature-list">
+                <div class="feature-item"><strong>📍 Rotas centralizadas</strong><span>Visualização clara de veículo, código, vagas e dados da rota.</span></div>
+                <div class="feature-item"><strong>✅ Confirmação de presença</strong><span>Participação controlada para evitar lotação e melhorar o planejamento.</span></div>
+                <div class="feature-item"><strong>🔐 Acesso por sessão</strong><span>Login integrado ao backend Node/Express do projeto.</span></div>
+            </div>
+        </section>
+
+        <section class="auth-card" aria-labelledby="titulo-login">
+            <h2 id="titulo-login">Entrar no sistema</h2>
+            <p>Use seu e-mail e senha cadastrados para acessar as rotas disponíveis.</p>
+
+            <div id="feedback" class="message" role="alert"></div>
+
+            <form id="loginForm" class="form-grid" novalidate>
+                <div class="field">
+                    <label for="email">E-mail</label>
+                    <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required>
+                </div>
+
+                <div class="field">
+                    <label for="senha">Senha</label>
+                    <input id="senha" name="senha" type="password" placeholder="Digite sua senha" autocomplete="current-password" required minlength="6">
+                </div>
+
+                <button id="loginButton" class="btn btn-full" type="submit">Entrar</button>
+            </form>
+
+            <p class="auth-footer">Ainda não possui conta? <a href="cadastro.html">Criar cadastro</a></p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>Sistema Logístico Transporte Universitário desenvolvido para a disciplina de Engenharia de Software.</p>
+        <p>Componentes: Ikaro Ferreira, Alexssandro Rocha, Gabriel Paiva e Artur Carvalho — UFERSA.</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>

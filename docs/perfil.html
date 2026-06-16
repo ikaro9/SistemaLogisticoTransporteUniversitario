@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil | Transporte Universitário</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="app-page">
+    <header class="app-header">
+        <nav class="navbar" aria-label="Navegação principal">
+            <a class="nav-brand" href="rotas.html"><span class="brand-icon">🚌</span> Transporte Universitário</a>
+            <div class="nav-menu">
+                <a class="nav-link" data-page="rotas" href="rotas.html">Rotas</a>
+                <a class="nav-link" data-page="participantes" href="participantes.html">Participação</a>
+                <a class="nav-link" data-page="perfil" href="perfil.html">Perfil</a>
+                <button id="logoutButton" class="btn btn-secondary" type="button">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="app-main">
+        <div id="perfilFeedback" class="message" role="alert"></div>
+        <div id="perfilLoading" class="loading"><div class="spinner"></div><span>Carregando perfil...</span></div>
+
+        <section class="profile-grid">
+            <article class="profile-card">
+                <div class="profile-avatar" id="avatarPerfil">U</div>
+                <h2 id="nome">...</h2>
+                <p id="email" class="card-muted">...</p>
+                <div class="info-list">
+                    <div class="info-line"><span>Telefone</span><strong id="telefone">...</strong></div>
+                    <div class="info-line"><span>Cidade</span><strong id="cidade">...</strong></div>
+                    <div class="info-line"><span>Tipo</span><strong id="tipo">...</strong></div>
+                    <div class="info-line"><span>Instituição</span><strong id="instituicao">...</strong></div>
+                </div>
+            </article>
+
+            <article class="card">
+                <div class="card-topline">
+                    <div>
+                        <h2>Minhas rotas</h2>
+                        <p class="card-muted">Rotas em que você já entrou pelo código.</p>
+                    </div>
+                    <a href="participantes.html" class="button-link btn-secondary">Gerenciar</a>
+                </div>
+                <div id="minhasRotas" class="grid" style="margin-top: 16px;"></div>
+            </article>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>Sistema Logístico Transporte Universitário desenvolvido para a disciplina de Engenharia de Software.</p>
+        <p>Componentes: Ikaro Ferreira, Alexssandro Rocha, Gabriel Paiva e Artur Carvalho — UFERSA.</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script src="js/perfil.js"></script>
+</body>
+</html>
