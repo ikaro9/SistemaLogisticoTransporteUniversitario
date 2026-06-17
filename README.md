@@ -49,6 +49,14 @@ A proposta busca organizar a comunicação entre alunos, motoristas e administra
 
 ---
 
+## Protótipo do Sistema
+
+O protótipo navegável do Sistema Logístico de Transporte Universitário pode ser acessado pelo link abaixo:
+
+https://shre.ink/prototipodoprojeto
+
+---
+
 ## Divisão de responsabilidades
 
 ## Integrante 1 — Banco de dados + Backend das rotas
